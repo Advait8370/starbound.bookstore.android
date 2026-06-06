@@ -4,9 +4,7 @@ const API =
 let books = [];
 
 let favorites =
-JSON.parse(
-localStorage.getItem("favorites") || "[]"
-);
+JSON.parse(localStorage.getItem("favorites") || "[]");
 
 const favCount =
 document.getElementById("fav-count");
@@ -20,11 +18,11 @@ async function loadBooks() {
   try {
 
     const response =
-    await fetch(API, {
-      cache: "no-cache"
+    await fetch(API,{
+      cache:"no-cache"
     });
 
-    if (!response.ok) {
+    if(!response.ok){
       throw new Error(
         "Failed to load books."
       );
@@ -36,46 +34,49 @@ async function loadBooks() {
     renderBooks();
     renderFavorites();
 
-  } catch (err) {
+  }catch(err){
 
     console.error(err);
 
     document.getElementById(
       "book-list"
     ).innerHTML =
-    `<h2 style="text-align:center;">
-      Failed to load books.
-    </h2>`;
+    "<h2 style='text-align:center'>Failed to load books.</h2>";
+
   }
+
 }
 
 /* -----------------------------
    Favorites
 ------------------------------*/
 
-function saveFavorites() {
+function saveFavorites(){
 
   localStorage.setItem(
     "favorites",
-    JSON.stringify(favorites)
+    JSON.stringify(
+      favorites
+    )
   );
 
   favCount.textContent =
   favorites.length;
+
 }
 
-function toggleFavorite(id) {
+function toggleFavorite(id){
 
-  if (
+  if(
     favorites.includes(id)
-  ) {
+  ){
 
     favorites =
     favorites.filter(
-      x => x !== id
+      x=>x!==id
     );
 
-  } else {
+  }else{
 
     favorites.push(id);
 
@@ -85,13 +86,14 @@ function toggleFavorite(id) {
 
   renderBooks();
   renderFavorites();
+
 }
 
 /* -----------------------------
    Render Books
 ------------------------------*/
 
-function renderBooks() {
+function renderBooks(){
 
   const search =
   document
@@ -100,49 +102,20 @@ function renderBooks() {
   .toLowerCase();
 
   let list =
-  books.filter(book =>
+  books.filter(book=>
     book.title
     .toLowerCase()
     .includes(search)
   );
-
-  const sort =
-  document
-  .getElementById("sort-filter")
-  .value;
-
-  if (
-    sort === "title-az"
-  ) {
-
-    list.sort((a,b)=>
-      a.title.localeCompare(
-        b.title
-      )
-    );
-
-  }
-
-  if (
-    sort === "title-za"
-  ) {
-
-    list.sort((a,b)=>
-      b.title.localeCompare(
-        a.title
-      )
-    );
-
-  }
 
   const grid =
   document.getElementById(
     "book-list"
   );
 
-  grid.innerHTML = "";
+  grid.innerHTML="";
 
-  list.forEach(book => {
+  list.forEach(book=>{
 
     const fav =
     favorites.includes(
@@ -159,8 +132,7 @@ function renderBooks() {
 
     card.innerHTML =
     `
-    <button
-      class="favorite-btn ${fav ? "favorited" : ""}">
+    <button class="favorite-btn ${fav?"favorited":""}">
       ❤️
     </button>
 
@@ -170,13 +142,9 @@ function renderBooks() {
       loading="lazy"
     >
 
-    <h3>
-      ${book.title}
-    </h3>
+    <h3>${book.title}</h3>
 
-    <p>
-      ${book.universe}
-    </p>
+    <p>${book.universe}</p>
 
     <div class="card-actions">
 
@@ -195,14 +163,13 @@ function renderBooks() {
     .querySelector(
       ".favorite-btn"
     )
-    .addEventListener(
-      "click",
-      () => {
-        toggleFavorite(
-          book.id
-        );
-      }
-    );
+    .onclick=()=>{
+
+      toggleFavorite(
+        book.id
+      );
+
+    };
 
     grid.appendChild(
       card
@@ -210,76 +177,56 @@ function renderBooks() {
 
   });
 
-  document
-  .getElementById(
-    "no-results"
-  )
-  .hidden =
-  list.length !== 0;
 }
 
 /* -----------------------------
    Favorites Page
 ------------------------------*/
 
-function renderFavorites() {
+function renderFavorites(){
 
   const grid =
   document.getElementById(
     "favorites-list"
   );
 
-  grid.innerHTML = "";
+  if(!grid)return;
 
-  const favBooks =
-  books.filter(book =>
+  grid.innerHTML="";
+
+  books
+  .filter(book=>
     favorites.includes(
       book.id
     )
-  );
-
-  favBooks.forEach(book => {
+  )
+  .forEach(book=>{
 
     grid.innerHTML +=
     `
     <div class="book-card">
 
-      <img
-        src="${book.cover}"
-        alt="${book.title}"
-      >
+    <img
+      src="${book.cover}"
+    >
 
-      <h3>
-        ${book.title}
-      </h3>
+    <h3>
+      ${book.title}
+    </h3>
 
-      <p>
-        ${book.universe}
-      </p>
+    <a
+    class="btn free"
+    href="reader.html?book=${encodeURIComponent(book.pdf)}&title=${encodeURIComponent(book.title)}">
 
-      <div class="card-actions">
+    📖 Read Book
 
-        <a
-        class="btn free"
-        href="reader.html?book=${encodeURIComponent(book.pdf)}&title=${encodeURIComponent(book.title)}">
-
-        📖 Read Book
-
-        </a>
-
-      </div>
+    </a>
 
     </div>
     `;
 
   });
 
-  document
-  .getElementById(
-    "no-favorites"
-  )
-  .hidden =
-  favBooks.length !== 0;
 }
 
 /* -----------------------------
@@ -290,59 +237,48 @@ document
 .querySelectorAll(
   ".nav-btn"
 )
-.forEach(btn => {
+.forEach(btn=>{
 
-  btn.addEventListener(
-    "click",
-    () => {
+  btn.onclick=()=>{
 
-      document
-      .querySelectorAll(
-        ".view"
-      )
-      .forEach(v => {
-        v.hidden = true;
-      });
+    document
+    .querySelectorAll(
+      ".view"
+    )
+    .forEach(v=>{
+      v.hidden=true;
+    });
 
-      document
-      .getElementById(
-        btn.dataset.view
-      )
-      .hidden = false;
+    document
+    .getElementById(
+      btn.dataset.view
+    )
+    .hidden=false;
 
-      if (
-        btn.dataset.view
-        === "favorites"
-      ) {
-        renderFavorites();
-      }
+    if(
+      btn.dataset.view
+      ===
+      "favorites"
+    ){
+
+      renderFavorites();
 
     }
-  );
+
+  };
 
 });
 
 /* -----------------------------
-   Search + Sort
+   Search
 ------------------------------*/
 
 document
 .getElementById(
   "search"
 )
-.addEventListener(
-  "input",
-  renderBooks
-);
-
-document
-.getElementById(
-  "sort-filter"
-)
-.addEventListener(
-  "change",
-  renderBooks
-);
+.oninput=
+renderBooks;
 
 /* -----------------------------
    Theme
@@ -352,19 +288,16 @@ document
 .getElementById(
   "theme-toggle"
 )
-.addEventListener(
-  "click",
-  () => {
+.onclick=()=>{
 
-    document
-    .documentElement
-    .classList
-    .toggle(
-      "light"
-    );
+  document
+  .documentElement
+  .classList
+  .toggle(
+    "light"
+  );
 
-  }
-);
+};
 
 /* -----------------------------
    Mobile Menu
@@ -374,21 +307,18 @@ document
 .getElementById(
   "menu-toggle"
 )
-.addEventListener(
-  "click",
-  () => {
+.onclick=()=>{
 
-    const menu =
-    document
-    .getElementById(
-      "mobile-menu"
-    );
+  const menu =
+  document
+  .getElementById(
+    "mobile-menu"
+  );
 
-    menu.hidden =
-    !menu.hidden;
+  menu.hidden =
+  !menu.hidden;
 
-  }
-);
+};
 
 /* -----------------------------
    Footer
@@ -409,4 +339,38 @@ favorites.length;
    Start App
 ------------------------------*/
 
-loadBooks();
+window.addEventListener(
+  "load",
+  async ()=>{
+
+    await loadBooks();
+
+    const splash =
+    document.getElementById(
+      "splash"
+    );
+
+    if(
+      splash
+    ){
+
+      splash.style.transition =
+      "opacity .8s ease";
+
+      splash.style.opacity =
+      "0";
+
+      setTimeout(
+        ()=>{
+
+          splash.style.display =
+          "none";
+
+        },
+        800
+      );
+
+    }
+
+  }
+);
