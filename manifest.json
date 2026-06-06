@@ -1,8 +1,8 @@
 {
-  "name": "Starbound Stories",
-  "short_name": "Stories",
+  "name": "Starbound Bookstore",
+  "short_name": "Starbound",
   "start_url": "./",
-  "display": "standalone",
+  "display": "fullscreen",
   "background_color": "#050816",
   "theme_color": "#050816",
   "icons": [
@@ -16,5 +16,10 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "categories": [
+    "books"
+  ],
+  "lang": "en",
+  "orientation": "portrait"
 }
