@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Starbound Stories</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#050816">
+
+<link rel="icon" href="images/favicon.ico">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="starfield"></canvas>
+
+<div id="splash">
+  <img src="images/logo.png" id="splash-logo">
+  <h1>STARBOUND STORIES</h1>
+  <p>Launching your next adventure among the stars...</p>
+  <div class="spinner"></div>
+</div>
+
+<div id="app">
+<header class="site-header">
+<div class="header-inner">
+<div class="brand">
+<img src="images/favicon.png" class="logo">
+<div>
+<h1>STARBOUND STORIES</h1>
+<p class="tagline">Short fiction, novels & cosmic adventures</p>
+</div>
+</div>
+
+<nav class="main-nav">
+<button class="nav-btn" data-view="home">Home</button>
+<button class="nav-btn" data-view="favorites">
+⭐ Favorites <span id="fav-count" class="badge">0</span>
+</button>
+<button class="nav-btn" data-view="about">About</button>
+</nav>
+
+<div class="actions">
+<button id="theme-toggle">🌙</button>
+<button id="menu-toggle">☰</button>
+</div>
+</div>
+
+<div id="mobile-menu" class="mobile-menu" hidden>
+<button class="nav-btn" data-view="home">Home</button>
+<button class="nav-btn" data-view="favorites">Favorites</button>
+<button class="nav-btn" data-view="about">About</button>
+</div>
+</header>
+
+<main class="main">
+
+<section id="home" class="view">
+<div class="controls">
+<div class="search-wrap">
+<input id="search" placeholder="Search books...">
+<ul id="suggestions" class="suggestions" hidden></ul>
+</div>
+
+<div class="filters">
+<select id="sort-filter">
+<option value="default">Default</option>
+<option value="title-az">A-Z</option>
+<option value="title-za">Z-A</option>
+</select>
+</div>
+</div>
+
+<div id="book-list" class="book-grid"></div>
+<p id="no-results" hidden>No books found.</p>
+</section>
+
+<section id="favorites" class="view" hidden>
+<h2>Favorites</h2>
+<div id="favorites-list" class="book-grid"></div>
+<p id="no-favorites" hidden>No favorites yet.</p>
+</section>
+
+<section id="about" class="view" hidden>
+<h2>About</h2>
+<p>Starbound Stories is powered directly from a GitHub repository.</p>
+</section>
+
+</main>
+
+<footer class="site-footer">
+© <span id="year"></span> Starbound Stories
+</footer>
+</div>
+
+<script src="script.js"></script>
+
+<script>
+if ("serviceWorker" in navigator){
+ window.addEventListener("load",()=>{
+   navigator.serviceWorker.register("sw.js");
+ });
+}
+</script>
+
+</body>
+</html>
