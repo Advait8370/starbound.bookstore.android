@@ -1,297 +1,582 @@
 const urlParams =
-  new URLSearchParams(window.location.search);
+new URLSearchParams(
+  window.location.search
+);
 
 const pdfUrl =
-  urlParams.get("book");
+urlParams.get("book");
 
 const title =
-  urlParams.get("title");
+urlParams.get("title");
 
-document.getElementById("book-title")
+document
+.getElementById(
+  "book-title"
+)
 .textContent =
-  decodeURIComponent(title || "Reader");
+decodeURIComponent(
+  title || "Reader"
+);
 
 const viewer =
-  document.getElementById("pdf-viewer");
+document.getElementById(
+  "pdf-viewer"
+);
 
 const loader =
-  document.getElementById("loader");
+document.getElementById(
+  "loader"
+);
 
 const pageNumEl =
-  document.getElementById("page-num");
+document.getElementById(
+  "page-num"
+);
 
 const pageCountEl =
-  document.getElementById("page-count");
+document.getElementById(
+  "page-count"
+);
 
 let pdfDoc = null;
 
-let scale = 1.3;
+let scale =
+parseFloat(
+localStorage.getItem(
+"readerZoom"
+) || "1.3"
+);
 
 let currentPage = 1;
 
-pdfjsLib.GlobalWorkerOptions.workerSrc =
+let touchStartX = 0;
+
+pdfjsLib
+.GlobalWorkerOptions
+.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
 
-/* Render */
+/* ---------------------
+   Render Page
+---------------------- */
 
-async function renderPage(pageNumber){
+async function renderPage(
+pageNumber
+){
+
+  if(!pdfDoc)
+  return;
 
   viewer.innerHTML = "";
 
   const page =
-    await pdfDoc.getPage(pageNumber);
+  await pdfDoc.getPage(
+    pageNumber
+  );
 
   const viewport =
-    page.getViewport({ scale });
+  page.getViewport({
+    scale
+  });
 
   const container =
-    document.createElement("div");
+  document.createElement(
+    "div"
+  );
 
   container.className =
-    "page-container";
+  "page-container";
 
   const canvas =
-    document.createElement("canvas");
+  document.createElement(
+    "canvas"
+  );
 
   const ctx =
-    canvas.getContext("2d");
+  canvas.getContext(
+    "2d"
+  );
 
   canvas.width =
-    viewport.width;
+  viewport.width;
 
   canvas.height =
-    viewport.height;
+  viewport.height;
 
-  container.appendChild(canvas);
+  container.appendChild(
+    canvas
+  );
 
-  viewer.appendChild(container);
+  viewer.appendChild(
+    container
+  );
 
   await page.render({
-    canvasContext:ctx,
+
+    canvasContext:
+    ctx,
+
     viewport
+
   }).promise;
 
   pageNumEl.textContent =
-    pageNumber;
+  pageNumber;
 
   pageCountEl.textContent =
-    pdfDoc.numPages;
+  pdfDoc.numPages;
 
   localStorage.setItem(
-    "last-page-" + pdfUrl,
+
+    "last-page-" +
+    pdfUrl,
+
     pageNumber
+
   );
+
 }
 
-/* Load PDF */
+/* ---------------------
+   Load PDF
+---------------------- */
 
 async function loadPDF(){
 
   try{
 
     pdfDoc =
-      await pdfjsLib
-      .getDocument(pdfUrl)
-      .promise;
+    await pdfjsLib
+    .getDocument(
+      pdfUrl
+    )
+    .promise;
 
     const savedPage =
-      localStorage.getItem(
-        "last-page-" + pdfUrl
-      );
+    localStorage.getItem(
+
+      "last-page-"
+      + pdfUrl
+
+    );
 
     if(savedPage){
+
       currentPage =
-        parseInt(savedPage);
+      parseInt(
+        savedPage
+      );
+
     }
 
-    await renderPage(currentPage);
+    await renderPage(
+      currentPage
+    );
 
-  }catch(err){
+  }
 
-    console.error(err);
+  catch(err){
 
-    viewer.innerHTML = `
-      <div style="
-        text-align:center;
-        padding:100px 20px;
-      ">
-        <h2>Failed to load PDF</h2>
-      </div>
+    console.error(
+      err
+    );
+
+    viewer.innerHTML =
+
+    `
+    <div style="
+    text-align:center;
+    padding:100px 20px;
+    ">
+
+    <h2>
+    Failed to load PDF
+    </h2>
+
+    <p>
+    ${err}
+    </p>
+
+    </div>
     `;
+
   }
 
   setTimeout(()=>{
-    loader.style.opacity = "0";
+
+    loader.style.opacity =
+    "0";
 
     setTimeout(()=>{
-      loader.style.display = "none";
+
+      loader.style.display =
+      "none";
+
     },800);
 
-  },700);
+  },500);
+
 }
 
-/* Controls */
+/* ---------------------
+   Navigation
+---------------------- */
 
-document.getElementById("next")
-.addEventListener("click",()=>{
+function nextPage(){
 
-  if(currentPage < pdfDoc.numPages){
+  if(
+
+    currentPage <
+    pdfDoc.numPages
+
+  ){
 
     currentPage++;
 
-    renderPage(currentPage);
+    renderPage(
+      currentPage
+    );
+
   }
-});
 
-document.getElementById("prev")
-.addEventListener("click",()=>{
+}
 
-  if(currentPage > 1){
+function prevPage(){
+
+  if(
+
+    currentPage > 1
+
+  ){
 
     currentPage--;
 
-    renderPage(currentPage);
+    renderPage(
+      currentPage
+    );
+
   }
-});
 
-document.getElementById("zoom-in")
-.addEventListener("click",()=>{
+}
 
-  scale += 0.15;
+/* ---------------------
+   Buttons
+---------------------- */
 
-  renderPage(currentPage);
-});
+document
+.getElementById(
+"next"
+)
+.onclick =
+nextPage;
 
-document.getElementById("zoom-out")
-.addEventListener("click",()=>{
+document
+.getElementById(
+"prev"
+)
+.onclick =
+prevPage;
 
-  if(scale > 0.6){
+document
+.getElementById(
+"zoom-in"
+)
+.onclick =
+()=>{
 
-    scale -= 0.15;
+scale += 0.15;
 
-    renderPage(currentPage);
-  }
-});
+localStorage.setItem(
 
-/* Fullscreen */
+"readerZoom",
 
-document.getElementById("fullscreen")
-.addEventListener("click",()=>{
+scale
 
-  if(!document.fullscreenElement){
-
-    document.documentElement
-    .requestFullscreen();
-
-  }else{
-
-    document.exitFullscreen();
-  }
-});
-
-/* Keyboard */
-
-document.addEventListener(
-  "keydown",
-  e=>{
-
-    if(e.key === "ArrowRight"){
-
-      if(currentPage < pdfDoc.numPages){
-
-        currentPage++;
-
-        renderPage(currentPage);
-      }
-    }
-
-    if(e.key === "ArrowLeft"){
-
-      if(currentPage > 1){
-
-        currentPage--;
-
-        renderPage(currentPage);
-      }
-    }
-  }
 );
 
-/* Starfield */
+renderPage(
+currentPage
+);
+
+};
+
+document
+.getElementById(
+"zoom-out"
+)
+.onclick =
+()=>{
+
+if(
+scale > 0.6
+){
+
+scale -= 0.15;
+
+localStorage.setItem(
+
+"readerZoom",
+
+scale
+
+);
+
+renderPage(
+currentPage
+);
+
+}
+
+};
+
+document
+.getElementById(
+"fullscreen"
+)
+.onclick =
+()=>{
+
+if(
+!document
+.fullscreenElement
+){
+
+document
+.documentElement
+.requestFullscreen();
+
+}else{
+
+document
+.exitFullscreen();
+
+}
+
+};
+
+/* ---------------------
+   Swipe
+---------------------- */
+
+document
+.addEventListener(
+
+"touchstart",
+
+e=>{
+
+touchStartX =
+
+e.changedTouches[0]
+.screenX;
+
+}
+
+);
+
+document
+.addEventListener(
+
+"touchend",
+
+e=>{
+
+const touchEndX =
+
+e.changedTouches[0]
+.screenX;
+
+if(
+
+touchEndX
+<
+touchStartX
+-
+80
+
+){
+
+nextPage();
+
+}
+
+if(
+
+touchEndX
+>
+touchStartX
++
+80
+
+){
+
+prevPage();
+
+}
+
+}
+
+);
+
+/* ---------------------
+   Keyboard
+---------------------- */
+
+document
+.addEventListener(
+
+"keydown",
+
+e=>{
+
+if(
+e.key ===
+"ArrowRight"
+){
+
+nextPage();
+
+}
+
+if(
+e.key ===
+"ArrowLeft"
+){
+
+prevPage();
+
+}
+
+}
+
+);
+
+/* ---------------------
+   Starfield
+---------------------- */
 
 const starCanvas =
-  document.getElementById("stars");
+document.getElementById(
+"stars"
+);
 
 const starCtx =
-  starCanvas.getContext("2d");
+starCanvas.getContext(
+"2d"
+);
 
 let w =
-  starCanvas.width =
-  window.innerWidth;
+starCanvas.width =
+window.innerWidth;
 
 let h =
-  starCanvas.height =
-  window.innerHeight;
+starCanvas.height =
+window.innerHeight;
 
-window.addEventListener(
-  "resize",
-  ()=>{
+window
+.addEventListener(
 
-    w =
-      starCanvas.width =
-      window.innerWidth;
+"resize",
 
-    h =
-      starCanvas.height =
-      window.innerHeight;
-  }
+()=>{
+
+w =
+starCanvas.width =
+window.innerWidth;
+
+h =
+starCanvas.height =
+window.innerHeight;
+
+}
+
 );
 
 const stars =
-  Array.from(
-    {length:120},
-    ()=>({
-      x:Math.random()*w,
-      y:Math.random()*h,
-      r:Math.random()*2,
-      s:Math.random()*0.5+0.2
-    })
-  );
+Array.from(
+
+{length:120},
+
+()=>({
+
+x:
+Math.random()*w,
+
+y:
+Math.random()*h,
+
+r:
+Math.random()*2,
+
+s:
+Math.random()*.6+.2
+
+})
+
+);
 
 function animateStars(){
 
-  starCtx.clearRect(0,0,w,h);
+starCtx.clearRect(
+0,
+0,
+w,
+h
+);
 
-  stars.forEach(star=>{
+stars.forEach(
 
-    star.y += star.s;
+star=>{
 
-    if(star.y > h){
-      star.y = 0;
-      star.x = Math.random()*w;
-    }
+star.y +=
+star.s;
 
-    starCtx.beginPath();
+if(
+star.y > h
+){
 
-    starCtx.fillStyle =
-      "rgba(255,255,255,0.8)";
+star.y = 0;
 
-    starCtx.arc(
-      star.x,
-      star.y,
-      star.r,
-      0,
-      Math.PI*2
-    );
+star.x =
+Math.random()*w;
 
-    starCtx.fill();
-  });
+}
 
-  requestAnimationFrame(
-    animateStars
-  );
+starCtx.beginPath();
+
+starCtx.fillStyle =
+"rgba(255,255,255,.8)";
+
+starCtx.arc(
+
+star.x,
+
+star.y,
+
+star.r,
+
+0,
+
+Math.PI*2
+
+);
+
+starCtx.fill();
+
+}
+
+);
+
+requestAnimationFrame(
+animateStars
+);
+
 }
 
 animateStars();
+
+/* ---------------------
+   Start
+---------------------- */
 
 loadPDF();
